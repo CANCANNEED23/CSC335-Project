@@ -384,8 +384,12 @@ entry-f)
 
 ;; Called when identifier is not found in environment
 (define initial-table
-(lambda (name)
-(car '())
+  (lambda (name)
+    (begin
+      (display "Error: Unbound variable ")
+      (display name)
+      (newline)
+      'unbound-variable)
 ) ; END_LAMBDA
 ) ; END_DEFINE
 
@@ -417,15 +421,15 @@ entry-f)
 (define evcon
 (lambda (lines table)
 (cond
-(
-(else? (question-of (car lines)))
-(meaning (answer-of (car lines)) table)
-)
-(
-(meaning (question-of (car lines)) table)
-(meaning (answer-of (car lines)) table)
-)
-(else (evcon (cdr lines) table) )
+  (
+   (else? (question-of (car lines)))
+   (meaning (answer-of (car lines)) table)
+   )
+  (
+   (meaning (question-of (car lines)) table)
+   (meaning (answer-of (car lines)) table)
+   )
+  (else (evcon (cdr lines) table) )
 ) ; END_COND
 ) ; END_LAMBDA
 ) ; END_DEFINE
@@ -641,7 +645,7 @@ entry-f)
 
 ;; QUOTED LIST
 
-(value '(a b c))     ; => (a b c)
+
 
 ;; PRIMITIVE APPLICATION
 
@@ -651,10 +655,6 @@ entry-f)
 
 ;; CONDITIONALS
 
-(value
- (cond
-   ((zero? 0) 'yes)
-   (else 'no)))       ; => yes
 
 ;; LAMBDA(FUNCTION)
 
