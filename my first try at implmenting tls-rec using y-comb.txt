@@ -1,0 +1,50 @@
+1.7: Adding Recursion to TLS Using the Y-Combinator
+In this phase of the project, we extend our interpreted language TLS into TLS-REC, a version of TLS that supports recursion without relying on named functions. 
+This is achieved by implementing a well-known concept from lambda calculus called the Y-combinator.
+
+What is the Y-Combinator?
+The Y-combinator is a fixed-point combinator — a higher-order function that, when applied to another function, gives back a version of that function that can call itself recursively.
+
+In simpler terms, the Y-combinator allows you to simulate recursion even in a system where functions can't refer to themselves by name. 
+This is especially useful in pure functional languages like the one we’re implementing in TLS, where variable bindings are explicit and functions are anonymous (i.e., have no name).
+
+Why Do We Need It?
+In most programming languages, you define recursive functions by giving them a name, like:
+
+scheme
+(define (fact n)
+  (if (zero? n) 1
+      (* n (fact (- n 1)))))
+
+But in pure lambda calculus (and thus in our interpreter TLS), we don't have global definitions like define. 
+Everything is expressed as function applications and lambda expressions. So to get recursion, we must build it from first principles — this is where the Y-combinator comes in.
+
+How Does the Y-Combinator Work?
+The Y-combinator works by taking a function f and returning a version of f that can call itself. 
+Internally, it constructs a function that, when applied to itself, feeds a version of itself into f. That sounds circular — and it is — but in lambda calculus, this "self-application" trick allows the recursion to unfold naturally.
+
+The key idea is: instead of defining a function that refers to itself by name, you define a function that takes another function as an argument — and then calls that argument when it needs to make a recursive call.
+
+How This Applies to TLS
+In TLS-REC, we define the Y-combinator within the interpreted language itself. Then we use it to write recursive functions like factorial — without any need for named definitions.
+
+This requires that TLS support:
+
+Closures, so that functions can "remember" the environment they were created in.
+
+Lexical scoping, so that variable references resolve properly.
+
+Higher-order functions, since the Y-combinator takes and returns functions.
+
+Once this is in place, recursive behaviors can be written entirely inside the interpreted language using the Y-combinator.
+
+Example Use
+Instead of saying “this function calls itself,” we define a function fact-body that takes fact as an argument and describes how to compute factorial using that argument for recursive calls. 
+Then, we pass fact-body to the Y-combinator to get a self-referential version that behaves like a true recursive factorial function.
+
+This shows how the Y-combinator enables anonymous recursion — a powerful and elegant mechanism in functional programming.
+
+Why This Matters
+Implementing the Y-combinator in TLS-REC not only enables recursion — it also proves that TLS is expressive enough to simulate core features of more complex languages, using only fundamental constructs. 
+It showcases the strength of pure lambda calculus, and it demonstrates that named recursion is not a primitive necessity — it can be built from simpler parts.
+

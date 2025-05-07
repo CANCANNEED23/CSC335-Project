@@ -167,6 +167,15 @@
 
 ;;;----------------------------------------------------------------------------|
 
+(define Y-comb
+  (lambda (f)
+    ((lambda (x) (f (lambda (v) ((x x) v))))
+     (lambda (x) (f (lambda (v) ((x x) v)))))
+    ); END_LAMBDA
+  );END_DEFINE
+
+;;;----------------------------------------------------------------------------|
+
 ; TODO:(1)
 (define first car)
 
@@ -311,6 +320,7 @@ entry-f)
 (  (eq? ze-expr 'add1)    *const)
 (  (eq? ze-expr 'sub1)    *const)
 (  (eq? ze-expr 'number?) *const)
+(  (eq? ze-expr 'Y-comb)       *const) 
 
       (else *identifier)
 
@@ -383,13 +393,20 @@ entry-f)
 ;;;----------------------------------------------------------------------------|
 
 ;; Called when identifier is not found in environment
+;; Create an initial environment with Y defined
 (define initial-table
   (lambda (name)
-    (begin
-      (display "Error: Unbound variable ")
-      (display name)
-      (newline)
-      'unbound-variable)
+    (cond
+      ((eq? name 'Y-comb)
+       (build-pair 'primitive Y-comb))
+      (else
+       (begin
+         (display "Error: Unbound variable ")
+         (display name)
+         (newline)
+         'unbound-variable)
+       )
+      )
 ) ; END_LAMBDA
 ) ; END_DEFINE
 
@@ -585,6 +602,17 @@ entry-f)
 ) ; END_CASE
 
 ;;;--------------------|
+
+((eq? name 'Y-comb)
+ (if (not (= (length vals) 1))
+     (begin 
+       (display "Error: Y-comb takes exactly one argument") 
+       (newline)
+       'error)
+     (let ((result (Y-comb (first vals))))
+       result)
+     ); END_IF
+ );END_CASE
 
 ) ; END_COND
 ) ; END_LAMBDA
