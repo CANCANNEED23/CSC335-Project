@@ -328,6 +328,8 @@ entry-f)
 (lambda (ze-expr)
 (cond
 
+(  (null? ze-expr) *empty-list)
+
 (  (atom? (car ze-expr))
 
 (cond
@@ -408,6 +410,14 @@ entry-f)
 (define *cond
 (lambda (ze-expr table)
 (evcon (cond-lines-of ze-expr) table)
+) ; END_LAMBDA
+) ; END_DEFINE
+
+;;;----------------------------------------------------------------------------|
+
+(define *empty-list
+  (lambda (ze-expr table)
+    '()
 ) ; END_LAMBDA
 ) ; END_DEFINE
 
@@ -636,15 +646,18 @@ entry-f)
 
 ;; TEST EXAMPLES
 
-;; CONSTANTS
+;; Atomics
 
 (value '42)           ; => 42
 (value '#t)           ; => #t
 (value 'add1)        ; => (primitive add1)
+(value '())
 
 
 ;; QUOTED LIST
 
+(value '(quote a))
+(value '(quote 1 2 3))
 
 
 ;; PRIMITIVE APPLICATION
@@ -655,11 +668,16 @@ entry-f)
 
 ;; CONDITIONALS
 
+(value '(cond ((null? '( 1 2)) 'empty) (else 'not-empty)))
+
 
 ;; LAMBDA(FUNCTION)
 
 (value
   '((lambda (x) (add1 x)) 5))  ; => 6
+
+(value
+ '((lambda (x) x) 1)) ; => 1
 
 ;; NESTED FUNCTION
 
