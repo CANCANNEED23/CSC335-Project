@@ -1,0 +1,135 @@
+;; [ANDREW MOBUS, Chengshui Zhu, Rezwan]
+;; [TLS Interpreter PROJECT 1.7]
+;; CSC 33500, Programming Language Paradigms, Spring 2025
+
+;  1.7 Drawing on Chapter 9 of The Little Schemer, equip your TLS with recursion to form TLS-REC, using the Y-combinator.
+;      Research Y-combinators, and prove that the implementation you use actually implements a Y-combinator.
+;      Explain, in detail, how the Y-combinator implements recursion.  Include interesting examples
+;      of recursive programs written TLS-REC
+; 
+
+
+(load "Final Project 1.3.scm")
+
+; This is a Y-combinator in r5rs:
+
+(lambda (f) 
+  ((lambda (x) (f (lambda (v) ((x x) v))))
+   (lambda (x) (f (lambda (v) ((x x) v))))))
+
+; Unlike normal recursion, which relies on named functions that can refer to themselves
+; Y-combinator support recursion in a pure lambda calculus setting where functions are anonymous
+; It allows us to implement recursion without relying on function names or mutable state
+
+; How is that possible?
+; The Y-combinator is a fixed-point combinator, a fixed point of a function f is a value x such that f(x) = x
+; It is a value that remains unchanged when the function is applied to it.
+; What does have to do with recursion? well, in the context of recursion,
+; we need a way to "tie the knot" - to create a function that can refer to itself.
+
+
+; In lambda calculus, the Y-combinator is defined as:
+; Y = λf.(λx.f(x x))(λx.f(x x))
+; When applied to a function f, it produces a fixed point of f.
+
+; Going back to the Y-combinator above,
+; it works by
+; first takes a function f as its argument - this is our recursive function generator
+; second it creates a self-application mechanism using nested lambdas
+; third when applied, it generates a recursive version of f that can call itself
+
+
+; To prove the r5rs code is a Y-combinator, we need to show for any fucntion F, Y(F) = F(Y(F))
+; Because this shows show it produces a fixed point
+
+; Here is the proof
+
+; Y = (lambda (f) 
+;       ((lambda (x) (f (lambda (v) ((x x) v))))
+;        (lambda (x) (f (lambda (v) ((x x) v))))))
+; 
+; ; Apply Y to F
+; Y(F) = ((lambda (f) 
+;           ((lambda (x) (f (lambda (v) ((x x) v))))
+;            (lambda (x) (f (lambda (v) ((x x) v))))))
+;         F)
+; 
+; ; Substitute f = F in the body
+; Y(F) = ((lambda (x) (F (lambda (v) ((x x) v))))
+;         (lambda (x) (F (lambda (v) ((x x) v)))))
+; 
+; ; Apply the outer lambda
+; Y(F) = (F (lambda (v) (((lambda (x) (F (lambda (w) ((x x) w))))
+;                        (lambda (x) (F (lambda (w) ((x x) w)))))
+;                        v)))
+; 
+; ; The expression in parentheses is Y(F) itself
+; Y(F) = F(lambda (v) (Y(F) v))
+;      = F(Y(F))
+
+
+
+; But that just proves the function is a Y-combinator because it can intake any function F and
+; Y(F) = F(Y(F)), which means it produces a fixed point, and thus is a Y-combinator
+; what does that have to do with recursion?
+
+; For Y-combinator, instead of writing a recursive function directly,
+; it write a function generator
+
+; This generator takes a function as input and returns a new function
+
+; The input function is used wherever we would make a recursive call
+
+; The Y-combinator transforms this generator into a properly recursive function
+
+; so basically we're passing the recursive function itself as an argument to the function definition,
+; allowing it to call itself without needing a name.
+
+
+; Then we apply the Y-combinator to get the recursive factorial
+
+; Given this example, which implements addition through recursion:
+
+(value '(((
+  (lambda (f) 
+    ((lambda (x) (f (lambda (v) ((x x) v))))
+     (lambda (x) (f (lambda (v) ((x x) v)))))
+    ); The first part is the Y-combinator itself
+  (lambda (recur) 
+    (lambda (a) 
+      (lambda (b) 
+        (cond 
+          ((zero? a) b)
+          (else (add1 ((recur (sub1 a)) b))))))); The second part is your recursive function generator
+) 3) 4))
+
+; 1) We define a generator function that takes recur and returns a function
+; 2) This returned function implements addition recursively:
+; ;    Base case: If a is zero, return b
+; ;    Recursive case: Increment the result of adding (a-1) to b
+; 3) When the Y-combinator is applied, it transforms this into a proper recursive function
+; 4) We then apply this function to 3 and 4, resulting in 7
+
+
+; Another example:
+
+(value '(
+         (
+          (lambda (f) 
+            (
+             (lambda (x) (f (lambda (v) ((x x) v))))
+             (lambda (x) (f (lambda (v) ((x x) v))))
+             )
+            ); The first part is the Y-combinator itself
+          (lambda (recur) 
+            (lambda (lst) 
+              (cond 
+                ((null? lst) 0)
+                (else (add1 (recur (cdr lst))))
+                )
+              )
+            ) ; The second part is your recursive function generator
+          )
+         '(1 2 3)
+         )
+       )
